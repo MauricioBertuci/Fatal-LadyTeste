@@ -1,15 +1,17 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
   <head>
-    <link rel="stylesheet" href="duvidasfreq.css" />
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Dúvidas Frequentes | Fatal Lady</title>
+
     <link
       rel="icon"
       href="/static/uploads/img/main_icon/icon.png"
       type="image/png"
     />
+
+    <!-- CSS base do site -->
     <link
       rel="stylesheet"
       href="{{ url_for('static', path='css/home-style.css') }}"
@@ -18,6 +20,14 @@
       rel="stylesheet"
       href="{{ url_for('static', path='css/layout-responsive.css') }}"
     />
+
+    <!-- CSS específico da página -->
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', path='css/duvidasfreq.css') }}"
+    />
+
+    <!-- Swiper (se for necessário em outras seções desta página) -->
     <link
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/swiper@12/swiper-bundle.min.css"
@@ -29,67 +39,80 @@
 
     <main class="conteudo">
       <section class="faq">
-        <h2>Dúvidas Frequentes</h2>
-        <p>
-          Confira abaixo as respostas para as perguntas mais comuns sobre nossos
-          produtos, entregas, trocas e outros serviços.
-        </p>
-
-        <div class="faq-item">
-          <h3>Como acompanho meu pedido?</h3>
+        <header class="faq-header">
+          <h1>Dúvidas Frequentes</h1>
           <p>
-            Assim que seu pedido for enviado, você receberá um e-mail com o
-            código de rastreamento e o link da transportadora. Você também pode
-            acompanhar o status em “Meus Pedidos” na sua conta.
+            Encontre respostas para as principais dúvidas sobre pedidos,
+            entregas, trocas, devoluções e outros serviços da Fatal Lady.
           </p>
+        </header>
+
+        <div class="faq-list">
+          <article class="faq-item">
+            <h3>Como acompanho meu pedido?</h3>
+            <p>
+              Assim que seu pedido for enviado, você receberá um e-mail com o
+              código de rastreamento e o link da transportadora. Você também
+              pode acompanhar o status em <strong>“Meus Pedidos”</strong> no
+              painel da sua conta.
+            </p>
+          </article>
+
+          <article class="faq-item">
+            <h3>O produto que quero está esgotado. Ele voltará ao estoque?</h3>
+            <p>
+              Alguns produtos são de edição limitada, mas em muitos casos há
+              reposição. Fique atento ao catálogo e aos avisos em nossas redes
+              sociais para saber quando os itens retornarem.
+            </p>
+          </article>
+
+          <article class="faq-item">
+            <h3>Posso alterar o endereço de entrega após finalizar o pedido?</h3>
+            <p>
+              Alterações de endereço só podem ser feitas antes da nota fiscal
+              ser emitida e do pedido ser postado. Caso precise ajustar, entre
+              em contato o quanto antes pelo <strong>Fale Conosco</strong>.
+            </p>
+          </article>
+
+          <article class="faq-item">
+            <h3>Quais são os prazos de entrega?</h3>
+            <p>
+              Os prazos variam de acordo com a sua região e forma de envio
+              selecionada no checkout. O prazo estimado é exibido antes da
+              finalização da compra e também no acompanhamento do pedido.
+            </p>
+          </article>
+
+          <article class="faq-item">
+            <h3>Como funcionam trocas e devoluções?</h3>
+            <p>
+              Você pode solicitar trocas e devoluções dentro do prazo previsto
+              em nossa política. Consulte a página de
+              <a href="/politicas/trocas/devolucoes">Trocas e Devoluções</a>
+              para mais detalhes sobre condições, prazos e procedimentos.
+            </p>
+          </article>
+
+          <article class="faq-item">
+            <h3>Quais formas de pagamento são aceitas?</h3>
+            <p>
+              Aceitamos cartões de crédito, PIX e outras opções exibidas na
+              etapa de pagamento. Todas as transações são processadas em
+              ambiente seguro.
+            </p>
+          </article>
         </div>
 
-        <div class="faq-item">
-          <h3>O produto que quero está esgotado. Ele voltará ao estoque?</h3>
+        <section class="faq-extra">
+          <h2>Não encontrou sua dúvida?</h2>
           <p>
-            Alguns produtos são de edição limitada, mas você pode se cadastrar
-            para ser avisado quando o item estiver disponível novamente.
+            Se a sua pergunta não foi respondida aqui, entre em contato pelo
+            <a href="/faleconosco">Fale Conosco</a> ou consulte nossas
+            <a href="/privacy">Políticas de Privacidade</a>.
           </p>
-        </div>
-
-        <div class="faq-item">
-          <h3>Como faço para trocar um produto?</h3>
-          <p>
-            Você pode solicitar a troca dentro de 7 dias após o recebimento,
-            seguindo as instruções em nossa
-            <a href="trocas e devoluções.html"
-              >Política de Trocas e Devoluções</a
-            >.
-          </p>
-        </div>
-
-        <div class="faq-item">
-          <h3>Quais são as formas de pagamento aceitas?</h3>
-          <p>
-            Aceitamos cartões de crédito, Pix e boleto bancário. As opções
-            disponíveis aparecem durante o checkout.
-          </p>
-        </div>
-
-        <div class="faq-item">
-          <h3>Meu produto veio com defeito, o que devo fazer?</h3>
-          <p>
-            Entre em contato pelo e-mail
-            <a href="mailto:atendimento@fatallady.com.br"
-              >atendimento@fatallady.com.br</a
-            >
-            informando o número do pedido e o problema. Nossa equipe retornará
-            com as instruções de análise e substituição.
-          </p>
-        </div>
-
-        <div class="faq-item">
-          <h3>Posso alterar ou cancelar meu pedido?</h3>
-          <p>
-            Enquanto o pedido não tiver sido despachado, é possível solicitar
-            alteração ou cancelamento entrando em contato com nosso atendimento.
-          </p>
-        </div>
+        </section>
       </section>
     </main>
 
@@ -119,8 +142,12 @@
         </div>
       </div>
       <hr />
-      <p class="copy">Coffe and Code | © 2025 Todos os direitos reservados</p>
-    </footer> 
+      <p class="copy">
+        Coffe and Code | © 2025 Todos os direitos reservados
+      </p>
+    </footer>
 
+    <!-- JS específico (caso precise) -->
+    <script src="https://cdn.jsdelivr.net/npm/swiper@12/swiper-bundle.min.js"></script>
   </body>
 </html>

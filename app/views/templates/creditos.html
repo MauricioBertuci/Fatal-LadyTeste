@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Créditos | Fatal Lady</title>
+
+    <link
+      rel="icon"
+      href="/static/uploads/img/main_icon/icon.png"
+      type="image/png"
+    />
+
+    <!-- CSS base do site -->
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', path='css/home-style.css') }}"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', path='css/layout-responsive.css') }}"
+    />
+  </head>
+
+  <body data-is-authenticated="{% if usuario %}true{% else %}false{% endif %}">
+    {% include '_header_nav.html' %}
+
+    <main class="conteudo">
+      <section class="creditos">
+        <header class="creditos-header">
+          <h1>Créditos</h1>
+          <p>
+            Este projeto foi desenvolvido com foco em experiência do usuário,
+            performance e escalabilidade. Abaixo, os responsáveis pelas
+            principais áreas do desenvolvimento.
+          </p>
+        </header>
+
+        <div class="creditos-grid">
+          <article class="credit-card">
+            <h2>Product Owner</h2>
+            <p class="credit-name">Coffe and Code</p>
+            <p class="credit-role">
+              Definição de escopo, backlog, priorização e visão do produto
+              Fatal Lady.
+            </p>
+          </article>
+
+          <article class="credit-card">
+            <h2>Front-end & UI/UX</h2>
+            <p class="credit-name">Coffe and Code</p>
+            <p class="credit-role">
+              Criação de componentes visuais, layout responsivo, refinamento da
+              identidade visual e interação do usuário.
+            </p>
+          </article>
+
+          <article class="credit-card">
+            <h2>Back-end & Integrações</h2>
+            <p class="credit-name">Coffe and Code</p>
+            <p class="credit-role">
+              APIs, rotas, regras de negócio, autenticação e integração com
+              banco de dados.
+            </p>
+          </article>
+
+          <article class="credit-card">
+            <h2>QA & Testes</h2>
+            <p class="credit-name">Coffe and Code</p>
+            <p class="credit-role">
+              Validação de fluxos críticos, testes de regressão e inspeção de
+              comportamento em diferentes dispositivos.
+            </p>
+          </article>
+        </div>
+
+        <section class="creditos-extra">
+          <h2>Agradecimentos</h2>
+          <p>
+            Agradecimentos a todos que contribuíram com feedbacks, testes e
+            ideias que ajudaram a evoluir a Fatal Lady como plataforma de
+            e-commerce.
+          </p>
+        </section>
+      </section>
+    </main>
+
+    <footer role="contentinfo">
+      <div class="footer-links">
+        <div>
+          <h4>Minha Conta</h4>
+          <a href="/me/dados">Meus Dados</a>
+          <a href="/me/meus-pedidos">Meus Pedidos</a>
+          <a href="/me/painel">Cashback</a>
+          <a href="/login">Login</a>
+        </div>
+
+        <div>
+          <h4>Suporte e Políticas</h4>
+          <a href="/politicas/trocas/devolucoes">Trocas e Devoluções</a>
+          <a href="/faq">Dúvidas Frequentes</a>
+          <a href="/faleconosco">Fale Conosco</a>
+          <a href="/privacy">Política de Privacidade</a>
+        </div>
+        <div>
+          <h4>Formas de Pagamento</h4>
+          <img
+            src="/static/uploads/img/catalogo/footer/payment.png"
+            alt="Formas de Pagamento"
+          />
+        </div>
+      </div>
+      <hr />
+      <p class="copy">
+        Coffe and Code | © 2025 Todos os direitos reservados
+      </p>
+    </footer>
+  </body>
+</html>
