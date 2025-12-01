@@ -15,7 +15,7 @@ from collections import defaultdict
 
 templates = Jinja2Templates(directory="app/views/templates")
 
-# ===================== CONFIG IMAGENS POR CATEGORIA =====================
+# imagens por categoria
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 STATIC_PRODUCTS_DIR = os.path.join(
@@ -34,9 +34,9 @@ IMAGES_URL_PREFIX = "/static/uploads/img/catalogo/products"
 CATEGORY_FOLDER_BY_KEY = {
     "tenis": "tenis",
     "sandalia": "sandalia",
-    "rasteira": "rasteira",
+    "rasteirinha": "rasteira",
     "sapatilha": "sapatilha",
-    "scarpin": "scarpins",
+    "salto alto": "scarpins",
     "scarpins": "scarpins",
     "bota": "botas",
     "botas": "botas",
@@ -45,8 +45,7 @@ CATEGORY_FOLDER_BY_KEY = {
 
 def _normalize_categoria_nome(nome: str) -> str:
     """
-    Remove acentos, converte para minúsculo e tira espaços extras.
-    Ex.: 'Tênis ' -> 'tenis'
+    remove acentos, converte para minúsculo e tira espaços extras
     """
     if not nome:
         return ""
@@ -60,7 +59,7 @@ def _normalize_categoria_nome(nome: str) -> str:
 
 def _load_category_images() -> dict[str, list[str]]:
     """
-    Lê as pastas de produtos dentro de STATIC_PRODUCTS_DIR e monta
+    lê as pastas de produtos dentro de STATIC_PRODUCTS_DIR e monta
     uma lista de URLs de imagem para cada pasta.
     """
     imagens_por_pasta: dict[str, list[str]] = {}
@@ -95,7 +94,7 @@ CATEGORY_IMAGES = _load_category_images()
 
 def get_images_for_category(nome_categoria: str) -> list[str]:
     """
-    Usa o nome da categoria do banco para achar a pasta e retornar
+    usa o nome da categoria do banco para achar a pasta e retornar
     a lista de URLs daquelas imagens.
     """
     key = _normalize_categoria_nome(nome_categoria)
@@ -105,27 +104,27 @@ def get_images_for_category(nome_categoria: str) -> list[str]:
     return CATEGORY_IMAGES.get(pasta, [])
 
 
-# ============================ FUNÇÕES ============================
+# funções
 
-def listar_produto(request: Request, db: Session):
-    token = request.cookies.get("token")
+# def listar_produto(request: Request, db: Session):
+#     token = request.cookies.get("token")
 
-    if token:
-        payload = verificar_token(token)
-        if payload:
-            email = payload.get("sub")
-            usuario = db.query(UsuarioDB).filter_by(email=email).first()
-        else:
-            usuario = None  # token inválido
-    else:
-        usuario = None  # nenhum token no cookie
+#     if token:
+#         payload = verificar_token(token)
+#         if payload:
+#             email = payload.get("sub")
+#             usuario = db.query(UsuarioDB).filter_by(email=email).first()
+#         else:
+#             usuario = None  # token inválido
+#     else:
+#         usuario = None  # nenhum token no cookie
 
-    produtos = db.query(ProdutoDB).all()
+#     produtos = db.query(ProdutoDB).all()
 
-    return templates.TemplateResponse(
-        "catalogo.html",
-        {"request": request, "usuario": usuario, "produtos": produtos}
-    )
+#     return templates.TemplateResponse(
+#         "catalogo.html",
+#         {"request": request, "usuario": usuario, "produtos": produtos}
+#     )
 
 
 def produtos_por_categoria(request: Request, db: Session):
