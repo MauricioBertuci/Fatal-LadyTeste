@@ -8,6 +8,7 @@ from app.models.usuario_model import UsuarioDB
 from app.models.produto_model import ProdutoDB
 from app.models.categoria_model import CategoriaDB
 from fastapi.templating import Jinja2Templates
+from sqlalchemy.orm import joinedload
 
 import os
 import unicodedata
@@ -126,7 +127,6 @@ def get_images_for_category(nome_categoria: str) -> list[str]:
 #         {"request": request, "usuario": usuario, "produtos": produtos}
 #     )
 
-
 def produtos_por_categoria(request: Request, db: Session):
     token = request.cookies.get("token")
     usuario = None
@@ -140,32 +140,15 @@ def produtos_por_categoria(request: Request, db: Session):
     produtos = (
         db.query(ProdutoDB)
         .options(joinedload(ProdutoDB.categoria))
+        .order_by(ProdutoDB.id_produto)  # ordenação estável
         .all()
     )
 
-    # Agrupa produtos por categoria para distribuir as imagens
-    grupos_por_categoria: dict[int, list[ProdutoDB]] = defaultdict(list)
+    # aplica a mesma regra de imagem para todos os produtos
     for produto in produtos:
-        if produto.categoria:
-            grupos_por_categoria[produto.categoria.id].append(produto)
+        atribuir_imagem_para_produto(produto)
 
-    # Para cada categoria, distribui as N imagens entre os produtos usando módulo
-    for grupo in grupos_por_categoria.values():
-        if not grupo:
-            continue
-
-        categoria_nome = grupo[0].categoria.nome if grupo[0].categoria else ""
-        imagens_categoria = get_images_for_category(categoria_nome)
-        if not imagens_categoria:
-            continue
-
-        total_imagens = len(imagens_categoria)
-
-        for idx, produto in enumerate(grupo):
-            # só sobrescreve se não tiver caminhoimagem no banco
-            if not produto.caminhoimagem:
-                produto.caminhoimagem = imagens_categoria[idx % total_imagens]
-
+    # monta lista de categorias se o template precisar
     categorias_map: dict[int, CategoriaDB] = {}
     for produto in produtos:
         if produto.categoria:
@@ -194,15 +177,20 @@ def get_produto(request: Request, id_produto: int, db: Session):
         return RedirectResponse(url="/login", status_code=303)
 
     email = payload.get("sub")
-    produto = db.query(ProdutoDB).filter(ProdutoDB.id_produto == id_produto).first()
 
-    # se não tiver imagem no banco, tenta pegar a da categoria
-    if produto and not produto.caminhoimagem and produto.categoria:
-        imagens_categoria = get_images_for_category(produto.categoria.nome)
-        if imagens_categoria:
-            produto.caminhoimagem = imagens_categoria[0]
+    produto = (
+        db.query(ProdutoDB)
+        .options(joinedload(ProdutoDB.categoria))
+        .filter(ProdutoDB.id_produto == id_produto)
+        .first()
+    )
+
+    # aplica a MESMA função de imagem
+    if produto:
+        atribuir_imagem_para_produto(produto)
 
     usuario = db.query(UsuarioDB).filter_by(email=email).first()
+
     return templates.TemplateResponse(
         "produto.html",
         {
@@ -211,3 +199,35 @@ def get_produto(request: Request, id_produto: int, db: Session):
             "usuario": usuario,
         },
     )
+
+
+
+def atribuir_imagem_para_produto(produto: ProdutoDB) -> None:
+    """
+    define produto.caminhoimagem de forma determinística com base na categoria
+    e no id do produto. a mesma regra vale para /produtos e /produto.
+    """
+    # se já tem imagem no banco, não mexe
+    if produto.caminhoimagem:
+        return
+
+    # se não tem categoria, não tem como associar
+    if not produto.categoria:
+        return
+
+    imagens_categoria = get_images_for_category(produto.categoria.nome)
+    if not imagens_categoria:
+        return
+
+    total_imagens = len(imagens_categoria)
+
+    # usa o id do produto para gerar um índice estável
+    pid = getattr(produto, "id_produto", None)
+    if not pid:
+        # fallback paranoico
+        produto.caminhoimagem = imagens_categoria[0]
+        return
+
+    # se id começar em 1, (pid - 1) deixa o primeiro produto da categoria na primeira imagem
+    idx = (pid - 1) % total_imagens
+    produto.caminhoimagem = imagens_categoria[idx]
