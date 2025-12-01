@@ -306,7 +306,7 @@
                     class="product-media"
                   >
                     <img
-                      src="/static/uploads/img/catalogo/products/default.png"
+                      src="{{ p.caminhoimagem or '/static/uploads/img/catalogo/products/default.png' }}"
                       alt="{{ p.nome }}"
                     />
                   </a>
