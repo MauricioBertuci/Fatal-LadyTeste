@@ -8,6 +8,7 @@ from app.models.usuario_model import UsuarioDB
 from app.models.produto_model import ProdutoDB
 from app.models.categoria_model import CategoriaDB
 from fastapi.templating import Jinja2Templates
+from sqlalchemy.orm import joinedload
 
 import os
 import unicodedata
@@ -15,7 +16,7 @@ from collections import defaultdict
 
 templates = Jinja2Templates(directory="app/views/templates")
 
-# ===================== CONFIG IMAGENS POR CATEGORIA =====================
+# imagens por categoria
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 STATIC_PRODUCTS_DIR = os.path.join(
@@ -34,9 +35,9 @@ IMAGES_URL_PREFIX = "/static/uploads/img/catalogo/products"
 CATEGORY_FOLDER_BY_KEY = {
     "tenis": "tenis",
     "sandalia": "sandalia",
-    "rasteira": "rasteira",
+    "rasteirinha": "rasteira",
     "sapatilha": "sapatilha",
-    "scarpin": "scarpins",
+    "salto alto": "scarpins",
     "scarpins": "scarpins",
     "bota": "botas",
     "botas": "botas",
@@ -45,8 +46,7 @@ CATEGORY_FOLDER_BY_KEY = {
 
 def _normalize_categoria_nome(nome: str) -> str:
     """
-    Remove acentos, converte para minúsculo e tira espaços extras.
-    Ex.: 'Tênis ' -> 'tenis'
+    remove acentos, converte para minúsculo e tira espaços extras
     """
     if not nome:
         return ""
@@ -60,7 +60,7 @@ def _normalize_categoria_nome(nome: str) -> str:
 
 def _load_category_images() -> dict[str, list[str]]:
     """
-    Lê as pastas de produtos dentro de STATIC_PRODUCTS_DIR e monta
+    lê as pastas de produtos dentro de STATIC_PRODUCTS_DIR e monta
     uma lista de URLs de imagem para cada pasta.
     """
     imagens_por_pasta: dict[str, list[str]] = {}
@@ -95,7 +95,7 @@ CATEGORY_IMAGES = _load_category_images()
 
 def get_images_for_category(nome_categoria: str) -> list[str]:
     """
-    Usa o nome da categoria do banco para achar a pasta e retornar
+    usa o nome da categoria do banco para achar a pasta e retornar
     a lista de URLs daquelas imagens.
     """
     key = _normalize_categoria_nome(nome_categoria)
@@ -105,28 +105,27 @@ def get_images_for_category(nome_categoria: str) -> list[str]:
     return CATEGORY_IMAGES.get(pasta, [])
 
 
-# ============================ FUNÇÕES ============================
+# funções
 
-def listar_produto(request: Request, db: Session):
-    token = request.cookies.get("token")
+# def listar_produto(request: Request, db: Session):
+#     token = request.cookies.get("token")
 
-    if token:
-        payload = verificar_token(token)
-        if payload:
-            email = payload.get("sub")
-            usuario = db.query(UsuarioDB).filter_by(email=email).first()
-        else:
-            usuario = None  # token inválido
-    else:
-        usuario = None  # nenhum token no cookie
+#     if token:
+#         payload = verificar_token(token)
+#         if payload:
+#             email = payload.get("sub")
+#             usuario = db.query(UsuarioDB).filter_by(email=email).first()
+#         else:
+#             usuario = None  # token inválido
+#     else:
+#         usuario = None  # nenhum token no cookie
 
-    produtos = db.query(ProdutoDB).all()
+#     produtos = db.query(ProdutoDB).all()
 
-    return templates.TemplateResponse(
-        "catalogo.html",
-        {"request": request, "usuario": usuario, "produtos": produtos}
-    )
-
+#     return templates.TemplateResponse(
+#         "catalogo.html",
+#         {"request": request, "usuario": usuario, "produtos": produtos}
+#     )
 
 def produtos_por_categoria(request: Request, db: Session):
     token = request.cookies.get("token")
@@ -141,32 +140,15 @@ def produtos_por_categoria(request: Request, db: Session):
     produtos = (
         db.query(ProdutoDB)
         .options(joinedload(ProdutoDB.categoria))
+        .order_by(ProdutoDB.id_produto)  # ordenação estável
         .all()
     )
 
-    # Agrupa produtos por categoria para distribuir as imagens
-    grupos_por_categoria: dict[int, list[ProdutoDB]] = defaultdict(list)
+    # aplica a mesma regra de imagem para todos os produtos
     for produto in produtos:
-        if produto.categoria:
-            grupos_por_categoria[produto.categoria.id].append(produto)
+        atribuir_imagem_para_produto(produto)
 
-    # Para cada categoria, distribui as N imagens entre os produtos usando módulo
-    for grupo in grupos_por_categoria.values():
-        if not grupo:
-            continue
-
-        categoria_nome = grupo[0].categoria.nome if grupo[0].categoria else ""
-        imagens_categoria = get_images_for_category(categoria_nome)
-        if not imagens_categoria:
-            continue
-
-        total_imagens = len(imagens_categoria)
-
-        for idx, produto in enumerate(grupo):
-            # só sobrescreve se não tiver caminhoimagem no banco
-            if not produto.caminhoimagem:
-                produto.caminhoimagem = imagens_categoria[idx % total_imagens]
-
+    # monta lista de categorias se o template precisar
     categorias_map: dict[int, CategoriaDB] = {}
     for produto in produtos:
         if produto.categoria:
@@ -195,15 +177,20 @@ def get_produto(request: Request, id_produto: int, db: Session):
         return RedirectResponse(url="/login", status_code=303)
 
     email = payload.get("sub")
-    produto = db.query(ProdutoDB).filter(ProdutoDB.id_produto == id_produto).first()
 
-    # se não tiver imagem no banco, tenta pegar a da categoria
-    if produto and not produto.caminhoimagem and produto.categoria:
-        imagens_categoria = get_images_for_category(produto.categoria.nome)
-        if imagens_categoria:
-            produto.caminhoimagem = imagens_categoria[0]
+    produto = (
+        db.query(ProdutoDB)
+        .options(joinedload(ProdutoDB.categoria))
+        .filter(ProdutoDB.id_produto == id_produto)
+        .first()
+    )
+
+    # aplica a MESMA função de imagem
+    if produto:
+        atribuir_imagem_para_produto(produto)
 
     usuario = db.query(UsuarioDB).filter_by(email=email).first()
+
     return templates.TemplateResponse(
         "produto.html",
         {
@@ -212,3 +199,35 @@ def get_produto(request: Request, id_produto: int, db: Session):
             "usuario": usuario,
         },
     )
+
+
+
+def atribuir_imagem_para_produto(produto: ProdutoDB) -> None:
+    """
+    define produto.caminhoimagem de forma determinística com base na categoria
+    e no id do produto. a mesma regra vale para /produtos e /produto.
+    """
+    # se já tem imagem no banco, não mexe
+    if produto.caminhoimagem:
+        return
+
+    # se não tem categoria, não tem como associar
+    if not produto.categoria:
+        return
+
+    imagens_categoria = get_images_for_category(produto.categoria.nome)
+    if not imagens_categoria:
+        return
+
+    total_imagens = len(imagens_categoria)
+
+    # usa o id do produto para gerar um índice estável
+    pid = getattr(produto, "id_produto", None)
+    if not pid:
+        # fallback paranoico
+        produto.caminhoimagem = imagens_categoria[0]
+        return
+
+    # se id começar em 1, (pid - 1) deixa o primeiro produto da categoria na primeira imagem
+    idx = (pid - 1) % total_imagens
+    produto.caminhoimagem = imagens_categoria[idx]
