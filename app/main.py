@@ -1,10 +1,12 @@
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
+
 # login google e facebook
 from starlette.middleware.sessions import SessionMiddleware
 from dotenv import load_dotenv
 import os
 
+# Rotas
 from app.routes.produto_router import router as produto_router
 from app.routes.login_router import router as login_router
 from app.routes.cadastro_router import router as cadastro_router
@@ -28,11 +30,13 @@ from app.routes.faq_router import router as faq_router
 from app.routes.faleconosco_router import router as faleconosco_router
 from app.routes.trocas_devolucoes_router import router as trocas_router
 
-from app.database import Base, engine
-from app.models import *
-
-
-Base.metadata.create_all(bind=engine)
+# Usuario Inativo
+from datetime import datetime
+from app.database import *
+from app.models.usuario_model import UsuarioDB
+import jwt
+from app.auth import *
+from jose import jwt, ExpiredSignatureError, JWTError
 
 app = FastAPI(title="Loja de Sapatos")
 
@@ -48,13 +52,6 @@ app.add_middleware(
 
 
 
-from datetime import datetime
-from app.database import *
-from app.models.usuario_model import UsuarioDB
-import jwt
-from app.auth import *
-
-from jose import jwt, ExpiredSignatureError, JWTError
 
 @app.middleware("http")
 async def verificar_usuario_inativo(request, call_next):

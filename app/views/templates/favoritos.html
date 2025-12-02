@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Meus favoritos - Fatal Lady</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link
+      rel="icon"
+      href="/static/uploads/img/main_icon/icon.png"
+      type="image/png"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', path='css/home-style.css') }}"
+    />
+  </head>
+  <body>
+    {% include "_header_nav.html" %}
+
+    <main>
+      <section id="favorites-page" class="favorites-wrapper">
+        <div class="container">
+          <header class="section-header favorites-header">
+            <h2>Meus favoritos</h2>
+            <p>Veja os produtos que você salvou na Fatal Lady.</p>
+          </header>
+
+          {# BLOCO SEM FAVORITOS #}
+          {% if not favoritos or favoritos|length == 0 %}
+            <div class="favorites-empty">
+              <h3>Você ainda não tem favoritos.</h3>
+              <p>
+                Explore o catálogo e clique no coração para salvar seus produtos
+                preferidos.
+              </p>
+              <!-- Se seu catálogo está em /produtos, use link direto -->
+              <a href="/produtos" class="btn-outline">
+                Ver catálogo
+              </a>
+            </div>
+          {% else %}
+            {# BLOCO COM FAVORITOS #}
+            <div class="favorites-meta">
+              <span>{{ favoritos|length }} produto(s) salvo(s)</span>
+              <a href="/produtos" class="favorites-link">
+                Continuar comprando
+              </a>
+            </div>
+
+            <div class="featured-grid">
+              {% for produto in favoritos %}
+                <article class="featured-card favorite-card">
+                  <a
+                    href="{{ url_for('produto_detalhe', id_produto=produto.id_produto) }}"
+                    class="featured-link"
+                  >
+                    <div class="featured-image">
+                      <img
+                        src="{{ produto.imagem_url }}"
+                        alt="{{ produto.nome }}"
+                        loading="lazy"
+                      />
+                      <div class="favorite-badge">
+                        &#10084;
+                      </div>
+                    </div>
+
+                    <div class="featured-info">
+                      <span class="featured-category">
+                        {{ produto.categoria_nome or 'Coleção Fatal Lady' }}
+                      </span>
+
+                      <h3 class="featured-name">
+                        {{ produto.nome }}
+                      </h3>
+
+                      <div class="favorite-price-row">
+                        <span class="featured-price">
+                          R$
+                          {{ "%.2f"|format(produto.preco)|replace('.', ',') }}
+                        </span>
+                      </div>
+                    </div>
+                  </a>
+
+                  <div class="favorite-actions">
+                    <form
+                      action="{{ url_for('delete_favorite', id_produto=produto.id_produto) }}"
+                      method="post"
+                    >
+                      <button type="submit" class="favorite-remove-btn">
+                        Remover dos favoritos
+                      </button>
+                    </form>
+
+                    <a
+                      href="{{ url_for('adicionar_ao_carrinho', id_produto=produto.id_produto) }}"
+                      class="btn-outline favorite-cart-btn"
+                    >
+                      Adicionar ao carrinho
+                    </a>
+                  </div>
+                </article>
+              {% endfor %}
+            </div>
+          {% endif %}
+        </div>
+      </section>
+    </main>
+
+  </body>
+</html>

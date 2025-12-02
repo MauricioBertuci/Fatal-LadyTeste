@@ -12,7 +12,7 @@ class UsuarioDB(Base):
     senha = Column(String(255), nullable=False)
     telefone = Column(String(30), nullable=False)
     is_admin = Column(Boolean, default=False)
-    cpf = Column(String(11), nullable=False) #colcoar unique
+    cpf = Column(String(11), unique=True, nullable=False)
     genero = Column(String, nullable=False)
     data_nascimento = Column(Date, nullable=False)
     ultima_atividade = Column(DateTime, default=datetime.utcnow)

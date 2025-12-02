@@ -1,14 +1,22 @@
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
+from fastapi import Request
 from app.models.favorito_model import FavoritoDB
 from app.models.produto_model import ProdutoDB
+from fastapi.templating import Jinja2Templates
+templates = Jinja2Templates(directory="app/views/templates")
 
 def listar_favoritos(id_usuario: int, db: Session):
-    favoritos = db.query(FavoritoDB).filter(FavoritoDB.id_usuario == id_usuario).all()
+    favoritos = (
+        db.query(FavoritoDB)
+        .filter(FavoritoDB.id_usuario == id_usuario)
+        .all()
+    )
+    # retorna lista de ProdutoDB
     return [f.produto for f in favoritos]
 
 def adicionar_favorito(id_usuario: int, id_produto: int, db: Session):
-    produto = db.query(ProdutoDB).filter(ProdutoDB.id == id_produto).first()
+    produto = db.query(ProdutoDB).filter(ProdutoDB.id_produto == id_produto).first()
     if not produto:
         raise HTTPException(status_code=404, detail="Produto não encontrado")
 
