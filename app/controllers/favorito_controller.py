@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from fastapi import Request
 from app.models.favorito_model import FavoritoDB
 from app.models.produto_model import ProdutoDB
+from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
 templates = Jinja2Templates(directory="app/views/templates")
 
@@ -28,7 +29,7 @@ def adicionar_favorito(id_usuario: int, id_produto: int, db: Session):
     db.add(favorito)
     db.commit()
     db.refresh(favorito)
-    return {"message": "Produto adicionado aos favoritos com sucesso!"}
+    return RedirectResponse(url="/favoritos", status_code=303)
 
 def remover_favorito(id_usuario: int, id_produto: int, db: Session):
     favorito = db.query(FavoritoDB).filter_by(id_usuario=id_usuario, id_produto=id_produto).first()
@@ -37,4 +38,4 @@ def remover_favorito(id_usuario: int, id_produto: int, db: Session):
 
     db.delete(favorito)
     db.commit()
-    return {"message": "Produto removido dos favoritos"}
+    return RedirectResponse(url="/favoritos", status_code=303)

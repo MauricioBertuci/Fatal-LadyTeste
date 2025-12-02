@@ -11,6 +11,17 @@ EMAIL_SENHA = os.getenv("EMAIL_SENHA")
 EMAIL_FROM_NAME = os.getenv("EMAIL_FROM_NAME", EMAIL_REMITENTE)
 
 
+from fastapi import Request
+from app.auth import verificar_token
+def _get_usuario_id(request: Request):
+    token = request.cookies.get("token")
+    if not token:
+        return None
+    payload = verificar_token(token)
+    if not payload:
+        return None
+    return payload.get("id")
+
 
 def validar_cpf(cpf: str) -> bool: #bool: faz retornar True ou False
     #remove tudo que não for número

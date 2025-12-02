@@ -42,5 +42,5 @@ def updade(id:int,nome:str=Form(...),
 
 #deletar produto
 @router.post("/produto/deletar/{id}")
-def delete(id:int,db:Session=Depends(get_db)):
-    return deletar_produto(id,db)
+def delete(id:int, request: Request,db:Session=Depends(get_db)):
+    return deletar_produto(id,request,db)

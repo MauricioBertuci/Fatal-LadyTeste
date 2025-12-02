@@ -9,8 +9,6 @@ from app.models.carrinho_model import CarrinhoDB, ItemCarrinhoDB
 from app.models.produto_model import ProdutoDB
 from fastapi.templating import Jinja2Templates
 
-from sqlalchemy.orm import joinedload
-
 
 templates = Jinja2Templates(directory="app/views/templates")
 

@@ -33,15 +33,28 @@ def list_favorites(request: Request, db: Session = Depends(get_db)):
 @router.post("/adicionar/{id_produto}")
 def add_favorite(id_produto: int, request: Request, db: Session = Depends(get_db)):
     token = request.cookies.get("token")
+    if not token:
+        return RedirectResponse(url="/login", status_code=303)
+
     payload = verificar_token(token)
+    if not payload:
+        return RedirectResponse(url="/login", status_code=303)
+
     id_usuario = payload.get("id")
 
     return adicionar_favorito(id_usuario, id_produto, db)
 
-@router.delete("/deletar/{id_produto}")
+@router.post("/deletar/{id_produto}")
 def delete_favorite(id_produto: int, request: Request, db: Session = Depends(get_db)):
     token = request.cookies.get("token")
+    if not token:
+        return RedirectResponse(url="/login", status_code=303)
+
     payload = verificar_token(token)
+    if not payload:
+        return RedirectResponse(url="/login", status_code=303)
+
     id_usuario = payload.get("id")
+
 
     return remover_favorito(id_usuario, id_produto, db)
